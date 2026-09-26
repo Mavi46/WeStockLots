@@ -1,0 +1,21 @@
+{% load django_vite %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% vite_hmr_client %}
+    {% vite_asset 'frontend/main.tsx' %}
+</head>
+
+<body>
+    {% block inertia %}
+    <script data-page="app" type="application/json">{{ page|safe }}</script>
+    <div id="app"></div>
+    {% endblock inertia %}
+</body>
+
+</html>
