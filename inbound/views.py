@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect
-from inertia import render
+from inertia import render, share
 from .models import Supplier, PurchaseOrder, Delivery
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 import json
+from django.http import HttpResponseForbidden
 
 
 def supplier_purchase_orders(request, supplier_id):
@@ -56,14 +57,46 @@ def create_delivery(request, purchase_order_id):
     )
     
 
+def validate_delivery_submission(data):
+    errors = {}
+
+    if not data.get("requested_delivery_date"):
+        errors["requested_delivery_date"] = "Requested delivery date is required."
+
+    if not data.get("carrier"):
+        errors["carrier"] = "Carrier is required."
+
+    if not data.get("pallet_count") and not data.get("package_count"):
+        errors["pallet_count"] = (
+            "Enter at least a pallet count or package count."
+        )
+
+    if not data.get("total_weight"):
+        errors["total_weight"] = "Total weight is required."
+
+    if not data.get("vehicle_registration"):
+        errors["vehicle_registration"] = (
+            "Vehicle registration is required."
+        )
+
+    return errors
+
+
 def edit_delivery(request, delivery_id):
     delivery = get_object_or_404(
         Delivery.objects.select_related("purchase_order"),
         pk=delivery_id,
     )
+    
+    if delivery.status != Delivery.Status.DRAFT:
+        return HttpResponseForbidden(
+            "This delivery can no longer be edited."
+        )
 
     if request.method == "POST":
         data = json.loads(request.body)
+        
+        action = data.get("action", "save")
 
         delivery.requested_delivery_date = (
             data.get("requested_delivery_date") or None
@@ -89,6 +122,55 @@ def edit_delivery(request, delivery_id):
             "supplier_comments",
             "",
         )
+
+        if action == "submit":
+            errors = validate_delivery_submission(data)
+
+            if errors:
+                return render(
+                    request,
+                    "Supplier/EditDelivery",
+                    props={
+                        "delivery": {
+                            "id": delivery.id,
+                            "status": delivery.status,
+                            "purchase_order": {
+                                "id": delivery.purchase_order.id,
+                                "order_number": delivery.purchase_order.order_number,
+                            },
+                            "requested_delivery_date": data.get(
+                                "requested_delivery_date",
+                                "",
+                            ),
+                            "carrier": data.get("carrier", ""),
+                            "pallet_count": (
+                                data.get("pallet_count") or None
+                            ),
+                            "package_count": (
+                                data.get("package_count") or None
+                            ),
+                            "total_weight": data.get(
+                                "total_weight",
+                                "",
+                            ),
+                            "loading_metres": data.get(
+                                "loading_metres",
+                                "",
+                            ),
+                            "vehicle_registration": data.get(
+                                "vehicle_registration",
+                                "",
+                            ),
+                            "supplier_comments": data.get(
+                                "supplier_comments",
+                                "",
+                            ),
+                        },
+                        "errors": errors,
+                    },
+                )
+
+            delivery.status = Delivery.Status.SUBMITTED
 
         delivery.save()
 

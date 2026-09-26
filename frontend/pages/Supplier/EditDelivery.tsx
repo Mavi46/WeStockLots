@@ -22,10 +22,11 @@ type Delivery = {
 
 type Props = {
     delivery: Delivery;
+    errors?: Record<string, string>
 };
 
-export default function EditDelivery({ delivery }: Props) {
-    const { data, setData, post, processing } = useForm({
+export default function EditDelivery({ delivery, errors = {}, }: Props) {
+    const { data, setData, post, processing, transform, } = useForm({
         requested_delivery_date: delivery.requested_delivery_date,
         carrier: delivery.carrier,
         pallet_count: delivery.pallet_count?.toString() ?? "",
@@ -37,6 +38,22 @@ export default function EditDelivery({ delivery }: Props) {
     });
 
     function saveDraft() {
+        transform((data) => ({
+            ...data,
+            action: "save",
+        }));
+
+        post(`/supplier/deliveries/${delivery.id}/edit/`, {
+            preserveScroll: true,
+        });
+    }
+
+    function submitDelivery() {
+        transform((data) => ({
+            ...data,
+            action: "submit",
+        }));
+
         post(`/supplier/deliveries/${delivery.id}/edit/`, {
             preserveScroll: true,
         });
@@ -69,6 +86,12 @@ export default function EditDelivery({ delivery }: Props) {
                         }
                         className="w-full rounded-md border p-2"
                     />
+                    {errors.requested_delivery_date && (
+                        <p className="mt-1 text-sm text-destructive">
+                            {errors.requested_delivery_date}
+                        </p>
+
+                    )}
                 </div>
 
                 <div>
@@ -84,6 +107,11 @@ export default function EditDelivery({ delivery }: Props) {
                         }
                         className="w-full rounded-md border p-2"
                     />
+                    {errors.carrier && (
+                        <p className="mt-1 text-sm text-destructive">
+                            {errors.carrier}
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -100,6 +128,11 @@ export default function EditDelivery({ delivery }: Props) {
                         }
                         className="w-full rounded-md border p-2"
                     />
+                    {errors.pallet_count && (
+                        <p className="mt-1 text-sm text-destructive">
+                            {errors.pallet_count}
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -133,6 +166,11 @@ export default function EditDelivery({ delivery }: Props) {
                         }
                         className="w-full rounded-md border p-2"
                     />
+                    {errors.total_weight && (
+                        <p className="mt-1 text-sm text-destructive">
+                            {errors.total_weight}
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -168,6 +206,11 @@ export default function EditDelivery({ delivery }: Props) {
                         }
                         className="w-full rounded-md border p-2"
                     />
+                    {errors.vehicle_registration && (
+                        <p className="mt-1 text-sm text-destructive">
+                            {errors.vehicle_registration}
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -196,8 +239,12 @@ export default function EditDelivery({ delivery }: Props) {
                         {processing ? "Saving..." : "Save draft"}
                     </Button>
 
-                    <Button type="button">
-                        Submit delivery
+                    <Button
+                        type="button"
+                        onClick={submitDelivery}
+                        disabled={processing}
+                    >
+                        {processing ? "Submitting..." : "Submit delivery"}
                     </Button>
                 </div>
             </div>
