@@ -1,17 +1,18 @@
 import "@vitejs/plugin-react/preamble";
 import { createInertiaApp } from "@inertiajs/react";
-import "@vitejs/plugin-react/preamble";
 import "./styles/globals.css";
 
-import Home from "./pages/Home";
+const pages = import.meta.glob("./pages/**/*.tsx", {
+    eager: true,
+});
 
 createInertiaApp({
     resolve: (name) => {
-        const pages = {
-            Home,
+        const page = pages[`./pages/${name}.tsx`] as {
+            default: React.ComponentType;
         };
 
-        return pages[name as keyof typeof pages];
+        return page.default;
     },
 
     http: {
