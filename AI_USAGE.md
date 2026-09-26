@@ -7,3 +7,8 @@ Voor dit project heb ik gekozen voor ChatGPT als sparringpartner voor begeleidin
 # Django project structuur
 Dit is mijn eerste project in Django, Inertia en React samen. Ik heb hier ai gebruikt om mij uit te leggen hoe Django apps gestructureerd worden binnen een project en hoe ik mijn ontwerp kan vertalen naar deze stack. Hierbij heeft ai mij begeleid om de inbound app te implementeren door middel van manage.py cli command. Ook heeft ai mij gewezen om de nieuwe inbound app te initialiseren in de INSTALLED_APPS en uitgelegd wat de bestanden doen die automatisch zijn aangemaakt n.a.v. de cli command.
 
+# Modellen en database-migratie
+Het datamodel en de relaties tussen de tabellen heb ik vooraf zelf gemodelleerd in een ERD. Omat dit mijn eerste project met Django is, heb ik ai gebruikt om mijn ontwerp te vertalen naar modeldefinities die ik vervolgens heb gecontroleerd en bevestigd. Vervolgens heb ik ook de gegenereerde modellen en relaties gecontroleerd en vergeleken met mijn ERD.
+
+
+

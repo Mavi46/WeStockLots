@@ -1,0 +1,79 @@
+[
+    {
+        "model": "inbound.supplier",
+        "pk": 1,
+        "fields": {
+            "name": "Supplier A"
+        }
+    },
+    {
+        "model": "inbound.supplier",
+        "pk": 2,
+        "fields": {
+            "name": "Supplier B"
+        }
+    },
+    {
+        "model": "inbound.supplier",
+        "pk": 3,
+        "fields": {
+            "name": "Supplier C"
+        }
+    },
+    {
+        "model": "inbound.warehouse",
+        "pk": 1,
+        "fields": {
+            "name": "Warehouse A",
+            "location": "Location A"
+        }
+    },
+    {
+        "model": "inbound.warehouse",
+        "pk": 2,
+        "fields": {
+            "name": "Warehouse B",
+            "location": "Location B"
+        }
+    },
+    {
+        "model": "inbound.warehouse",
+        "pk": 3,
+        "fields": {
+            "name": "Warehouse C",
+            "location": "Location C"
+        }
+    },
+    {
+        "model": "inbound.purchaseorder",
+        "pk": 1,
+        "fields": {
+            "order_number": "PO-001",
+            "supplier": 1
+        }
+    },
+    {
+        "model": "inbound.purchaseorder",
+        "pk": 2,
+        "fields": {
+            "order_number": "PO-002",
+            "supplier": 1
+        }
+    },
+    {
+        "model": "inbound.purchaseorder",
+        "pk": 3,
+        "fields": {
+            "order_number": "PO-003",
+            "supplier": 2
+        }
+    },
+    {
+        "model": "inbound.purchaseorder",
+        "pk": 4,
+        "fields": {
+            "order_number": "PO-004",
+            "supplier": 3
+        }
+    }
+]
