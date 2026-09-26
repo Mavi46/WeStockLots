@@ -9,4 +9,9 @@ urlpatterns = [
         views.supplier_purchase_orders,
         name="supplier-purchase-orders",
     ),
+    path(
+        "purchase-orders/<int:purchase_order_id>/deliveries/create/",
+        views.create_delivery,
+        name="create-delivery",
+    ),
 ]

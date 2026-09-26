@@ -13,3 +13,5 @@ Het datamodel en de relaties tussen de tabellen heb ik vooraf zelf gemodelleerd 
 # Seed data
 Ik heb AI gebruikt om de vooraf door mij bepaalde seed data om te zetten naar een Django JSON-fixture. AI heeft geholpen met de juiste structuur. Vervolgens heb ik de fixture zelf geladen en gecontroleerd of de gegevens correct in de db waren toegevoegd.
 
+
+
