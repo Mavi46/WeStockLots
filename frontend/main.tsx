@@ -2,17 +2,21 @@ import "@vitejs/plugin-react/preamble";
 import { createInertiaApp } from "@inertiajs/react";
 import "./styles/globals.css";
 
-const pages = import.meta.glob("./pages/**/*.tsx", {
-    eager: true,
-});
+const pages = import.meta.glob("./pages/**/*.tsx");
 
 createInertiaApp({
-    resolve: (name) => {
-        const page = pages[`./pages/${name}.tsx`] as {
+    resolve: async (name) => {
+        const page = pages[`./pages/${name}.tsx`];
+
+        if (!page) {
+            throw new Error(`Page not found: ${name}`);
+        }
+
+        const module = await page() as {
             default: React.ComponentType;
         };
 
-        return page.default;
+        return module.default;
     },
 
     http: {
