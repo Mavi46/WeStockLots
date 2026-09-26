@@ -213,3 +213,101 @@ def edit_delivery(request, delivery_id):
             },
         },
     )
+    
+
+def warehouse_deliveries(request):
+    deliveries = (
+        Delivery.objects
+        .filter(status=Delivery.Status.SUBMITTED)
+        .select_related(
+            "purchase_order",
+            "purchase_order__supplier",
+        )
+        .order_by("id")
+    )
+
+    return render(
+        request,
+        "Warehouse/Deliveries",
+        props={
+            "deliveries": [
+                {
+                    "id": delivery.id,
+                    "status": delivery.status,
+                    "purchase_order": {
+                        "id": delivery.purchase_order.id,
+                        "order_number": delivery.purchase_order.order_number,
+                    },
+                    "supplier": {
+                        "id": delivery.purchase_order.supplier.id,
+                        "name": delivery.purchase_order.supplier.name,
+                    },
+                    "requested_delivery_date": (
+                        delivery.requested_delivery_date.isoformat()
+                        if delivery.requested_delivery_date
+                        else ""
+                    ),
+                    "carrier": delivery.carrier,
+                    "pallet_count": delivery.pallet_count,
+                    "package_count": delivery.package_count,
+                    "total_weight": (
+                        str(delivery.total_weight)
+                        if delivery.total_weight is not None
+                        else ""
+                    ),
+                    "vehicle_registration": delivery.vehicle_registration,
+                }
+                for delivery in deliveries
+            ],
+        },
+    )
+    
+    
+def review_delivery(request, delivery_id):
+    delivery = get_object_or_404(
+        Delivery.objects.select_related(
+            "purchase_order",
+            "purchase_order__supplier",
+        ),
+        pk=delivery_id,
+        status=Delivery.Status.SUBMITTED,
+    )
+
+    return render(
+        request,
+        "Warehouse/ReviewDelivery",
+        props={
+            "delivery": {
+                "id": delivery.id,
+                "status": delivery.status,
+                "purchase_order": {
+                    "id": delivery.purchase_order.id,
+                    "order_number": delivery.purchase_order.order_number,
+                },
+                "supplier": {
+                    "id": delivery.purchase_order.supplier.id,
+                    "name": delivery.purchase_order.supplier.name,
+                },
+                "requested_delivery_date": (
+                    delivery.requested_delivery_date.isoformat()
+                    if delivery.requested_delivery_date
+                    else ""
+                ),
+                "carrier": delivery.carrier,
+                "pallet_count": delivery.pallet_count,
+                "package_count": delivery.package_count,
+                "total_weight": (
+                    str(delivery.total_weight)
+                    if delivery.total_weight is not None
+                    else ""
+                ),
+                "loading_metres": (
+                    str(delivery.loading_metres)
+                    if delivery.loading_metres is not None
+                    else ""
+                ),
+                "vehicle_registration": delivery.vehicle_registration,
+                "supplier_comments": delivery.supplier_comments,
+            },
+        },
+    )

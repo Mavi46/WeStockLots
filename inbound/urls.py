@@ -19,4 +19,14 @@ urlpatterns = [
         views.edit_delivery,
         name="edit-delivery",
     ),
+    path(
+        "warehouse/deliveries/",
+        views.warehouse_deliveries,
+        name="warehouse-deliveries",
+    ),
+    path(
+        "warehouse/deliveries/<int:delivery_id>/review/",
+        views.review_delivery,
+        name="review-delivery",
+    ),
 ]
