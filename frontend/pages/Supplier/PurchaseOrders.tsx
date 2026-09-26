@@ -6,6 +6,11 @@ type Supplier = {
     name: string;
 };
 
+type Delivery = {
+    id: number;
+    status: string;
+};
+
 type PurchaseOrder = {
     id: number;
     order_number: string;
@@ -17,11 +22,6 @@ type Props = {
     purchase_orders: PurchaseOrder[];
 };
 
-type Delivery = {
-    id: number;
-    status: string;
-};
-
 export default function PurchaseOrders({
     supplier,
     purchase_orders,
@@ -29,6 +29,12 @@ export default function PurchaseOrders({
     function createDelivery(purchaseOrderId: number) {
         router.post(
             `/purchase-orders/${purchaseOrderId}/deliveries/create/`
+        );
+    }
+
+    function editDelivery(deliveryId: number) {
+        router.get(
+            `/supplier/deliveries/${deliveryId}/edit/`
         );
     }
 
@@ -53,7 +59,11 @@ export default function PurchaseOrders({
                                 {purchaseOrder.order_number}
                             </span>
 
-                            <Button onClick={() => createDelivery(purchaseOrder.id)}>
+                            <Button
+                                onClick={() =>
+                                    createDelivery(purchaseOrder.id)
+                                }
+                            >
                                 Create delivery
                             </Button>
                         </div>
@@ -67,9 +77,22 @@ export default function PurchaseOrders({
                                 purchaseOrder.deliveries.map((delivery) => (
                                     <div
                                         key={delivery.id}
-                                        className="rounded-md bg-muted p-3"
+                                        className="flex items-center justify-between rounded-md bg-muted p-3"
                                     >
-                                        Delivery #{delivery.id} — {delivery.status}
+                                        <span>
+                                            Delivery #{delivery.id} — {delivery.status}
+                                        </span>
+
+                                        {delivery.status === "draft" && (
+                                            <Button
+                                                variant="outline"
+                                                onClick={() =>
+                                                    editDelivery(delivery.id)
+                                                }
+                                            >
+                                                Edit delivery
+                                            </Button>
+                                        )}
                                     </div>
                                 ))
                             )}
