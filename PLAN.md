@@ -21,7 +21,7 @@ Een purchaseOrder behoort tot één Supplier en kan meerdere Deliveries hebben. 
 
 # Leveringsproces:
 
-Een levering zonder processen heeft de volgende statussen: draft -> submitted -> scheduled -> received
+Een levering binnen het standaardproces heeft de volgende statussen: draft -> submitted -> scheduled -> received
 
 In bijzondere gevallen: submitted -> changes_requested -> submitted of submitted -> rejected
 
