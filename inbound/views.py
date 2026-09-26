@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect
 from inertia import render, share
-from .models import Supplier, PurchaseOrder, Delivery
+from .models import Supplier, PurchaseOrder, Delivery, Warehouse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 import json
@@ -273,6 +273,90 @@ def review_delivery(request, delivery_id):
         status=Delivery.Status.SUBMITTED,
     )
 
+    warehouses = Warehouse.objects.order_by("id")
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        warehouse_id = data.get("warehouse_id")
+        scheduled_at = data.get("scheduled_at")
+        warehouse_comment = data.get("warehouse_comment", "")
+
+        errors = {}
+
+        if not warehouse_id:
+            errors["warehouse_id"] = "Warehouse is required."
+
+        if not scheduled_at:
+            errors["scheduled_at"] = (
+                "Scheduled date and time is required."
+            )
+
+        if errors:
+            return render(
+                request,
+                "Warehouse/ReviewDelivery",
+                props={
+                    "delivery": {
+                        "id": delivery.id,
+                        "status": delivery.status,
+                        "purchase_order": {
+                            "id": delivery.purchase_order.id,
+                            "order_number": delivery.purchase_order.order_number,
+                        },
+                        "supplier": {
+                            "id": delivery.purchase_order.supplier.id,
+                            "name": delivery.purchase_order.supplier.name,
+                        },
+                        "requested_delivery_date": (
+                            delivery.requested_delivery_date.isoformat()
+                            if delivery.requested_delivery_date
+                            else ""
+                        ),
+                        "carrier": delivery.carrier,
+                        "pallet_count": delivery.pallet_count,
+                        "package_count": delivery.package_count,
+                        "total_weight": (
+                            str(delivery.total_weight)
+                            if delivery.total_weight is not None
+                            else ""
+                        ),
+                        "loading_metres": (
+                            str(delivery.loading_metres)
+                            if delivery.loading_metres is not None
+                            else ""
+                        ),
+                        "vehicle_registration": delivery.vehicle_registration,
+                        "supplier_comments": delivery.supplier_comments,
+                    },
+                    "warehouses": [
+                        {
+                            "id": warehouse.id,
+                            "name": warehouse.name,
+                            "location": warehouse.location,
+                        }
+                        for warehouse in warehouses
+                    ],
+                    "errors": errors,
+                },
+            )
+
+        warehouse = get_object_or_404(
+            Warehouse,
+            pk=warehouse_id,
+        )
+
+        delivery.warehouse = warehouse
+        delivery.scheduled_at = scheduled_at
+        delivery.warehouse_comment = warehouse_comment
+        delivery.status = Delivery.Status.SCHEDULED
+
+        delivery.save()
+
+        return redirect(
+            "inbound:warehouse-deliveries"
+        )
+
     return render(
         request,
         "Warehouse/ReviewDelivery",
@@ -309,5 +393,13 @@ def review_delivery(request, delivery_id):
                 "vehicle_registration": delivery.vehicle_registration,
                 "supplier_comments": delivery.supplier_comments,
             },
+            "warehouses": [
+                {
+                    "id": warehouse.id,
+                    "name": warehouse.name,
+                    "location": warehouse.location,
+                }
+                for warehouse in warehouses
+            ],
         },
     )

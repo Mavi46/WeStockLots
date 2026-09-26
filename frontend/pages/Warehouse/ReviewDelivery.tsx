@@ -1,4 +1,4 @@
-import { router } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 
 type Delivery = {
@@ -27,9 +27,32 @@ type Delivery = {
 
 type Props = {
     delivery: Delivery;
+    warehouses: Warehouse[];
+    errors?: Record<string, string>;
 };
 
-export default function ReviewDelivery({ delivery }: Props) {
+type Warehouse = {
+    id: number;
+    name: string;
+    location: string;
+};
+
+export default function ReviewDelivery({ delivery, warehouses, errors = {} }: Props) {
+    const { data, setData, post, processing } = useForm({
+        warehouse_id: "",
+        scheduled_at: "",
+        warehouse_comment: "",
+    });
+
+    function scheduleDelivery() {
+        post(
+            `/warehouse/deliveries/${delivery.id}/review/`,
+            {
+                preserveScroll: true,
+            }
+        );
+    }
+
     return (
         <main className="mx-auto max-w-3xl p-10">
             <Button
@@ -154,6 +177,92 @@ export default function ReviewDelivery({ delivery }: Props) {
                     </div>
                 </div>
             </div>
+
+            <div className="mt-8 rounded-md border p-6">
+                <h2 className="text-xl font-semibold">
+                    Schedule delivery
+                </h2>
+
+                <div className="mt-5 space-y-5">
+                    <div>
+                        <label className="mb-1 block text-sm font-medium">
+                            Warehouse
+                        </label>
+
+                        <select
+                            value={data.warehouse_id}
+                            onChange={(event) =>
+                                setData("warehouse_id", event.target.value)
+                            }
+                            className="w-full rounded-md border bg-background p-2"
+                        >
+                            <option value="">
+                                Select warehouse
+                            </option>
+
+                            {warehouses.map((warehouse) => (
+                                <option
+                                    key={warehouse.id}
+                                    value={warehouse.id}
+                                >
+                                    {warehouse.name} — {warehouse.location}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.warehouse_id && (
+                            <p className="mt-1 text-sm text-destructive">
+                                {errors.warehouse_id}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-sm font-medium">
+                            Scheduled date and time
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            value={data.scheduled_at}
+                            onChange={(event) =>
+                                setData("scheduled_at", event.target.value)
+                            }
+                            className="w-full rounded-md border p-2"
+                        />
+                        {errors.scheduled_at && (
+                            <p className="mt-1 text-sm text-destructive">
+                                {errors.scheduled_at}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-sm font-medium">
+                            Warehouse comment
+                        </label>
+
+                        <textarea
+                            value={data.warehouse_comment}
+                            onChange={(event) =>
+                                setData(
+                                    "warehouse_comment",
+                                    event.target.value
+                                )
+                            }
+                            className="min-h-24 w-full rounded-md border p-2"
+                        />
+                    </div>
+
+                    <Button
+                        type="button"
+                        onClick={scheduleDelivery}
+                        disabled={processing}
+                    >
+                        {processing ? "Scheduling..." : "Schedule delivery"}
+                    </Button>
+                </div>
+            </div>
+
         </main>
     );
 }
