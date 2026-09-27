@@ -30,6 +30,18 @@ type Props = {
     purchase_orders: PurchaseOrder[];
 };
 
+function formatDiscrepancyType(type: string) {
+    const labels: Record<string, string> = {
+        quantity: "Quantity",
+        damaged_goods: "Damaged goods",
+        incorrect_products: "Incorrect products",
+        pallet_package_count: "Pallet/package count",
+        other: "Other",
+    };
+
+    return labels[type] ?? type;
+}
+
 export default function PurchaseOrders({
     supplier,
     purchase_orders,
@@ -139,8 +151,8 @@ export default function PurchaseOrders({
                                                                     key={discrepancy.id}
                                                                     className="rounded-md border p-3"
                                                                 >
-                                                                    <p className="text-sm font-medium capitalize">
-                                                                        {discrepancy.type}
+                                                                    <p className="text-sm font-medium">
+                                                                        {formatDiscrepancyType(discrepancy.type)}
                                                                     </p>
 
                                                                     <p className="mt-1 text-sm text-muted-foreground">

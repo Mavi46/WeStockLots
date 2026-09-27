@@ -181,17 +181,26 @@ export default function RecordReceipt({
                                             Select type
                                         </option>
 
-                                        <option value="missing">
-                                            Missing
+                                        <option value="quantity">
+                                            Quantity
                                         </option>
 
-                                        <option value="over">
-                                            Over
+                                        <option value="damaged_goods">
+                                            Damaged goods
                                         </option>
 
-                                        <option value="quality">
-                                            Quality
+                                        <option value="incorrect_products">
+                                            Incorrect products
                                         </option>
+
+                                        <option value="pallet_package_count">
+                                            Pallet/package count
+                                        </option>
+
+                                        <option value="other">
+                                            Other
+                                        </option>
+
                                     </select>
 
                                     {errors[

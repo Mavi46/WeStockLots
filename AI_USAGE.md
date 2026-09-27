@@ -19,4 +19,7 @@ Ik heb AI gebruikt als ondersteuning bij het implementeren van de supplier deliv
 # Warehouse delivery workflow
 Voor de warehouse workflow heb ik AI gebruikt om mijn vooraf bepaalde statusflow technisch te vertalen naar de stack. Eerst is een warehouse-overzicht opgezet, waarin alleen deliveries met de status submitted worden getoond. Vanuit dit overzicht kan een warehouse medewerker een delivery openen en de door de supplier aangeleverde gegevens bekijken. Vervolgens heb ik eerst met ondersteuning van AI de overgang van submitted naar scheduled gebouwd. Hierna heb ik met AI de changes_requested workflow toegevoegd. Hierbij kan een warehouse medewerker wijziging(en) aanvragen met behulp van de warehouse_comment veld. Dit komt dan weer terecht bij de supplier en wordt het bericht getoond.
 
-De rejected workflow heb ik zelf gebouwd op basis van de bestaande structuur die wel eerder door AI is gegenereerd. 
+De rejected workflow heb ik zelf gebouwd op basis van de bestaande structuur die wel eerder door AI is opgezet. 
+
+# Receipt en discrepancies
+Voor het verwerken van de ontvangsten heb ik AI gebruikt om de laatste stap van mijn vooraf ontworpen delivery workflow te implementeren. Er is nu onderscheid op de warehouse weergave tussen de submitted en scheduled deliveries. Op de receipt pagina kan de warehouse medewerker nul of meerdere discrepancies registreren, voordat de ontvangst wordt bevestigd. AI stelde daarnaast voor om het opslaan van de receipt en discrepancies binnen een database transaction uit te voeren. Ik heb dit afgewezen, omdat het buiten de scope valt. Tot slot heb ik met AI de supplier pagina uitgebreid, zodat een supplier ook de eventuele discrepancies kan zien. 
