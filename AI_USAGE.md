@@ -1,6 +1,6 @@
 Voor dit project heb ik gekozen voor ChatGPT als sparringpartner voor begeleiding/troubleshooting bij het opzetten van de boilerplate met de vereiste stack (Django, PostgreSQL, Inertia, React en shadcn). Hier heb ik bewust niet gekozen voor Codex, omdat ik graag alles onder controle wil houden en geen agent nodig heb die voor mij een heel project gaat realiseren.
 
-# 1. Boierpalte:
+# 1. Boilerpalte:
 - Bij het configureren van shadcn kreeg ik assetproblemen, waarvoor ik AI heb gebruikt. Hier heb ik de typeset Geist moeten verwijderen en Sans Serif toegevoegd.
 - Nadat ik mijn ERD heb gemaakt heb ik AI gevraagd om er overheen te kijken. Chat gaf hierbij een voorstel om 'review_comment' te gebruiken die ik bewust heb afgewezen, omdat dit buiten de scope valt.
 
@@ -23,3 +23,6 @@ De rejected workflow heb ik zelf gebouwd op basis van de bestaande structuur die
 
 # Receipt en discrepancies
 Voor het verwerken van de ontvangsten heb ik AI gebruikt om de laatste stap van mijn vooraf ontworpen delivery workflow te implementeren. Er is nu onderscheid op de warehouse weergave tussen de submitted en scheduled deliveries. Op de receipt pagina kan de warehouse medewerker nul of meerdere discrepancies registreren, voordat de ontvangst wordt bevestigd. AI stelde daarnaast voor om het opslaan van de receipt en discrepancies binnen een database transaction uit te voeren. Ik heb dit afgewezen, omdat het buiten de scope valt. Tot slot heb ik met AI de supplier pagina uitgebreid, zodat een supplier ook de eventuele discrepancies kan zien. 
+
+# Testing
+Voor het testen heb ik AI gebruikt om de belangrijkste businessregels en statusovergasngen te vertalen naar testcases. Tijdens het testen kwam een timezone warning voor het scheduled_at veld die ik met AI heb opgelost. 11/11 tests succesvol uitgevoerd.
