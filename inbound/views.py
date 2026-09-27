@@ -5,6 +5,8 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 import json
 from django.http import HttpResponseForbidden
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 
 def supplier_purchase_orders(request, supplier_id):
@@ -423,7 +425,12 @@ def review_delivery(request, delivery_id):
             )
 
             delivery.warehouse = warehouse
-            delivery.scheduled_at = scheduled_at
+            
+            scheduled_datetime = parse_datetime(scheduled_at)
+            if scheduled_datetime and timezone.is_naive(scheduled_datetime):
+                scheduled_datetime = timezone.make_aware(scheduled_datetime)
+            delivery.scheduled_at = scheduled_datetime
+            
             delivery.warehouse_comment = warehouse_comment
             delivery.status = Delivery.Status.SCHEDULED
 
