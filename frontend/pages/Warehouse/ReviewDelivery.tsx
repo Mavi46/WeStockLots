@@ -72,6 +72,20 @@ export default function ReviewDelivery({ delivery, warehouses, errors = {} }: Pr
         );
     }
 
+    function rejectDelivery() {
+        transform((data) => ({
+            ...data,
+            action: "reject",
+        }));
+
+        post(
+            `/warehouse/deliveries/${delivery.id}/review/`,
+            {
+                preserveScroll: true,
+            }
+        );
+    }
+
     return (
         <main className="mx-auto max-w-3xl p-10">
             <Button
@@ -292,7 +306,16 @@ export default function ReviewDelivery({ delivery, warehouses, errors = {} }: Pr
                             onClick={requestChanges}
                             disabled={processing}
                         >
-                            Request changes
+                            {processing ? "Requesting..." : "Request changes"}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={rejectDelivery}
+                            disabled={processing}
+                        >
+                            {processing ? "Rejecting..." : "Reject delivery"}
                         </Button>
                     </div>
                 </div>

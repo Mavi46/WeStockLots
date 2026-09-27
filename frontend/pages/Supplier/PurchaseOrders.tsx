@@ -9,6 +9,7 @@ type Supplier = {
 type Delivery = {
     id: number;
     status: string;
+    warehouse_comment?: string;
 };
 
 type PurchaseOrder = {
@@ -80,7 +81,11 @@ export default function PurchaseOrders({
                                         className="flex items-center justify-between rounded-md bg-muted p-3"
                                     >
                                         <span>
-                                            Delivery #{delivery.id} — {delivery.status}
+                                            Delivery #{delivery.id} — {delivery.status} {delivery.status === "rejected" && delivery.warehouse_comment && (
+                                                <div>
+                                                    Reason: {delivery.warehouse_comment}
+                                                </div>
+                                            )}
                                         </span>
 
                                         {(

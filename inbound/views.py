@@ -21,6 +21,7 @@ def supplier_purchase_orders(request, supplier_id):
                 {
                     "id": delivery.id,
                     "status": delivery.status,
+                    "warehouse_comment": delivery.warehouse_comment,
                 }
                 for delivery in purchase_order.deliveries.all()
             ]
@@ -311,6 +312,12 @@ def review_delivery(request, delivery_id):
                 errors["warehouse_comment"] = (
                     "Warehouse comment is required when requesting changes."
                 )
+                
+        elif action == "reject":
+            if not warehouse_comment.strip():
+                errors["warehouse_comment"] = (
+                    "Warehouse comment is required when rejecting a delivery."
+                )
 
         if errors:
             return render(
@@ -379,6 +386,10 @@ def review_delivery(request, delivery_id):
         elif action == "request_changes":
             delivery.warehouse_comment = warehouse_comment
             delivery.status = Delivery.Status.CHANGES_REQUESTED
+            
+        elif action == "reject":
+            delivery.warehouse_comment = warehouse_comment
+            delivery.status = Delivery.Status.REJECTED
 
         delivery.save()
 
