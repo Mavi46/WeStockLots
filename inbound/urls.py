@@ -29,4 +29,9 @@ urlpatterns = [
         views.review_delivery,
         name="review-delivery",
     ),
+    path(
+        "warehouse/deliveries/<int:delivery_id>/receipt/",
+        views.record_receipt,
+        name="record-receipt",
+    ),
 ]

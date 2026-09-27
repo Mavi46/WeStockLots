@@ -6,10 +6,17 @@ type Supplier = {
     name: string;
 };
 
+type Discrepancy = {
+    id: number;
+    type: string;
+    description: string;
+};
+
 type Delivery = {
     id: number;
     status: string;
     warehouse_comment?: string;
+    discrepancies: Discrepancy[];
 };
 
 type PurchaseOrder = {
@@ -78,29 +85,74 @@ export default function PurchaseOrders({
                                 purchaseOrder.deliveries.map((delivery) => (
                                     <div
                                         key={delivery.id}
-                                        className="flex items-center justify-between rounded-md bg-muted p-3"
+                                        className="rounded-md bg-muted p-3"
                                     >
-                                        <span>
-                                            Delivery #{delivery.id} — {delivery.status} {delivery.status === "rejected" && delivery.warehouse_comment && (
-                                                <div>
-                                                    Reason: {delivery.warehouse_comment}
+                                        <div className="flex items-center justify-between">
+                                            <span>
+                                                Delivery #{delivery.id} —{" "}
+                                                {delivery.status}
+                                            </span>
+
+                                            {(
+                                                delivery.status === "draft" ||
+                                                delivery.status === "changes_requested"
+                                            ) && (
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            editDelivery(delivery.id)
+                                                        }
+                                                    >
+                                                        Edit delivery
+                                                    </Button>
+                                                )}
+                                        </div>
+
+                                        {delivery.status === "rejected" &&
+                                            delivery.warehouse_comment && (
+                                                <div className="mt-3">
+                                                    <p className="text-sm font-medium">
+                                                        Rejection reason
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm text-muted-foreground">
+                                                        {delivery.warehouse_comment}
+                                                    </p>
                                                 </div>
                                             )}
-                                        </span>
 
-                                        {(
-                                            delivery.status === "draft" ||
-                                            delivery.status === "changes_requested"
-                                        ) && (
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() =>
-                                                        editDelivery(delivery.id)
-                                                    }
-                                                >
-                                                    Edit delivery
-                                                </Button>
-                                            )}
+                                        {delivery.status === "received" && (
+                                            <div className="mt-4">
+                                                <p className="text-sm font-medium">
+                                                    Discrepancies
+                                                </p>
+
+                                                {delivery.discrepancies.length === 0 ? (
+                                                    <p className="mt-1 text-sm text-muted-foreground">
+                                                        No discrepancies reported.
+                                                    </p>
+                                                ) : (
+                                                    <div className="mt-2 space-y-2">
+                                                        {delivery.discrepancies.map(
+                                                            (discrepancy) => (
+                                                                <div
+                                                                    key={discrepancy.id}
+                                                                    className="rounded-md border p-3"
+                                                                >
+                                                                    <p className="text-sm font-medium capitalize">
+                                                                        {discrepancy.type}
+                                                                    </p>
+
+                                                                    <p className="mt-1 text-sm text-muted-foreground">
+                                                                        {discrepancy.description}
+                                                                    </p>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ))
                             )}

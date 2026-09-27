@@ -23,16 +23,47 @@ type Delivery = {
     vehicle_registration: string;
 };
 
-type Props = {
-    deliveries: Delivery[];
+type ScheduledDelivery = {
+    id: number;
+    status: string;
+
+    purchase_order: {
+        id: number;
+        order_number: string;
+    };
+
+    supplier: {
+        id: number;
+        name: string;
+    };
+
+    warehouse: {
+        id: number;
+        name: string;
+        location: string;
+    };
+
+    scheduled_at: string;
 };
 
-export default function Deliveries({ deliveries }: Props) {
+type Props = {
+    deliveries: Delivery[];
+    scheduled_deliveries: ScheduledDelivery[];
+};
+
+export default function Deliveries({ deliveries, scheduled_deliveries }: Props) {
     function reviewDelivery(deliveryId: number) {
         router.get(
             `/warehouse/deliveries/${deliveryId}/review/`
         );
     }
+
+    function recordReceipt(deliveryId: number) {
+        router.get(
+            `/warehouse/deliveries/${deliveryId}/receipt/`
+        );
+    }
+
     return (
         <main className="mx-auto max-w-4xl p-10">
             <h1 className="text-3xl font-bold">
@@ -115,6 +146,76 @@ export default function Deliveries({ deliveries }: Props) {
                     ))
                 )}
             </div>
+
+            <section className="mt-12">
+                <h2 className="text-2xl font-bold">
+                    Scheduled deliveries
+                </h2>
+
+                <p className="mt-2 text-muted-foreground">
+                    Deliveries waiting to be received.
+                </p>
+
+                <div className="mt-6 space-y-4">
+                    {scheduled_deliveries.length === 0 ? (
+                        <p className="text-muted-foreground">
+                            No scheduled deliveries.
+                        </p>
+                    ) : (
+                        scheduled_deliveries.map((delivery) => (
+                            <div
+                                key={delivery.id}
+                                className="rounded-md border p-5"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h3 className="font-semibold">
+                                            Delivery #{delivery.id}
+                                        </h3>
+
+                                        <p className="text-sm text-muted-foreground">
+                                            {delivery.purchase_order.order_number}
+                                            {" — "}
+                                            {delivery.supplier.name}
+                                        </p>
+                                    </div>
+
+                                    <span className="text-sm font-medium">
+                                        {delivery.status}
+                                    </span>
+                                </div>
+
+                                <div className="mt-4 space-y-1 text-sm">
+                                    <p>
+                                        Warehouse: {delivery.warehouse.name}
+                                    </p>
+
+                                    <p>
+                                        Location: {delivery.warehouse.location}
+                                    </p>
+
+                                    <p>
+                                        Scheduled at: {delivery.scheduled_at}
+                                    </p>
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="mt-5"
+                                    onClick={() =>
+                                        recordReceipt(delivery.id)
+                                    }
+                                >
+                                    Process delivery
+                                </Button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
+
+
         </main>
     );
 }

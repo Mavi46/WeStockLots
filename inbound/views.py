@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect
 from inertia import render, share
-from .models import Supplier, PurchaseOrder, Delivery, Warehouse
+from .models import Supplier, PurchaseOrder, Delivery, Warehouse, Discrepancy
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 import json
@@ -9,7 +9,7 @@ from django.http import HttpResponseForbidden
 
 def supplier_purchase_orders(request, supplier_id):
     supplier = get_object_or_404(
-        Supplier.objects.prefetch_related("purchase_orders__deliveries"),
+        Supplier.objects.prefetch_related("purchase_orders__deliveries__discrepancies"),
         pk=supplier_id,
     )
 
@@ -19,9 +19,17 @@ def supplier_purchase_orders(request, supplier_id):
             "order_number": purchase_order.order_number,
             "deliveries": [
                 {
-                    "id": delivery.id,
+                    "id": delivery.id, 
                     "status": delivery.status,
                     "warehouse_comment": delivery.warehouse_comment,
+                    "discrepancies": [
+                        {
+                            "id": discrepancy.id,
+                            "type": discrepancy.type,
+                            "description": discrepancy.description,
+                        }
+                        for discrepancy in delivery.discrepancies.all()
+                    ],
                 }
                 for delivery in purchase_order.deliveries.all()
             ]
@@ -234,6 +242,17 @@ def warehouse_deliveries(request):
         .order_by("id")
     )
 
+    scheduled_deliveries = (
+        Delivery.objects
+        .filter(status=Delivery.Status.SCHEDULED)
+        .select_related(
+            "purchase_order",
+            "purchase_order__supplier",
+            "warehouse",
+        )
+        .order_by("scheduled_at")
+    )
+
     return render(
         request,
         "Warehouse/Deliveries",
@@ -266,6 +285,31 @@ def warehouse_deliveries(request):
                     "vehicle_registration": delivery.vehicle_registration,
                 }
                 for delivery in deliveries
+            ],
+            "scheduled_deliveries": [
+                {
+                    "id": delivery.id,
+                    "status": delivery.status,
+                    "purchase_order": {
+                        "id": delivery.purchase_order.id,
+                        "order_number": delivery.purchase_order.order_number,
+                    },
+                    "supplier": {
+                        "id": delivery.purchase_order.supplier.id,
+                        "name": delivery.purchase_order.supplier.name,
+                    },
+                    "warehouse": {
+                        "id": delivery.warehouse.id,
+                        "name": delivery.warehouse.name,
+                        "location": delivery.warehouse.location,
+                    },
+                    "scheduled_at": (
+                        delivery.scheduled_at.isoformat()
+                        if delivery.scheduled_at
+                        else ""
+                    ),
+                }
+                for delivery in scheduled_deliveries
             ],
         },
     )
@@ -445,5 +489,98 @@ def review_delivery(request, delivery_id):
                 }
                 for warehouse in warehouses
             ],
+        },
+    )
+    
+def record_receipt(request, delivery_id):
+    delivery = get_object_or_404(
+        Delivery.objects.select_related(
+            "purchase_order",
+            "purchase_order__supplier",
+            "warehouse",
+        ),
+        pk=delivery_id,
+        status=Delivery.Status.SCHEDULED,
+    )
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        discrepancies = data.get("discrepancies", [])
+
+        errors = {}
+
+        for index, discrepancy in enumerate(discrepancies):
+            if not discrepancy.get("type"):
+                errors[f"discrepancy_{index}_type"] = (
+                    "Discrepancy type is required."
+                )
+
+            if not discrepancy.get("description", "").strip():
+                errors[f"discrepancy_{index}_description"] = (
+                    "Description is required."
+                )
+
+        if errors:
+            return render(
+                request,
+                "Warehouse/RecordReceipt",
+                props={
+                    "delivery": {
+                        "id": delivery.id,
+                        "status": delivery.status,
+                        "purchase_order": {
+                            "id": delivery.purchase_order.id,
+                            "order_number": delivery.purchase_order.order_number,
+                        },
+                        "supplier": {
+                            "id": delivery.purchase_order.supplier.id,
+                            "name": delivery.purchase_order.supplier.name,
+                        },
+                        "warehouse": {
+                            "id": delivery.warehouse.id,
+                            "name": delivery.warehouse.name,
+                            "location": delivery.warehouse.location,
+                        },
+                    },
+                    "errors": errors,
+                },
+            )
+
+        for discrepancy in discrepancies:
+            Discrepancy.objects.create(
+                delivery=delivery,
+                type=discrepancy["type"],
+                description=discrepancy["description"],
+            )
+
+        delivery.status = Delivery.Status.RECEIVED
+        delivery.save()
+
+        return redirect(
+            "inbound:warehouse-deliveries"
+        )
+
+    return render(
+        request,
+        "Warehouse/RecordReceipt",
+        props={
+            "delivery": {
+                "id": delivery.id,
+                "status": delivery.status,
+                "purchase_order": {
+                    "id": delivery.purchase_order.id,
+                    "order_number": delivery.purchase_order.order_number,
+                },
+                "supplier": {
+                    "id": delivery.purchase_order.supplier.id,
+                    "name": delivery.purchase_order.supplier.name,
+                },
+                "warehouse": {
+                    "id": delivery.warehouse.id,
+                    "name": delivery.warehouse.name,
+                    "location": delivery.warehouse.location,
+                },
+            },
         },
     )
