@@ -18,6 +18,7 @@ type Delivery = {
     loading_metres: string;
     vehicle_registration: string;
     supplier_comments: string;
+    warehouse_comment: string;
 };
 
 type Props = {
@@ -68,6 +69,18 @@ export default function EditDelivery({ delivery, errors = {}, }: Props) {
             <p className="mt-2 text-muted-foreground">
                 {delivery.purchase_order.order_number}
             </p>
+
+            {delivery.status === "changes_requested" && (
+                <div className="mt-6 rounded-md border p-4">
+                    <p className="text-sm font-medium">
+                        Changes requested by warehouse
+                    </p>
+
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        {delivery.warehouse_comment}
+                    </p>
+                </div>
+            )}
 
             <div className="mt-8 space-y-5">
                 <div>

@@ -38,13 +38,32 @@ type Warehouse = {
 };
 
 export default function ReviewDelivery({ delivery, warehouses, errors = {} }: Props) {
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, transform } = useForm({
         warehouse_id: "",
         scheduled_at: "",
         warehouse_comment: "",
     });
 
     function scheduleDelivery() {
+        transform((data) => ({
+            ...data,
+            action: "schedule",
+        }));
+
+        post(
+            `/warehouse/deliveries/${delivery.id}/review/`,
+            {
+                preserveScroll: true,
+            }
+        );
+    }
+
+    function requestChanges() {
+        transform((data) => ({
+            ...data,
+            action: "request_changes",
+        }));
+
         post(
             `/warehouse/deliveries/${delivery.id}/review/`,
             {
@@ -251,15 +270,31 @@ export default function ReviewDelivery({ delivery, warehouses, errors = {} }: Pr
                             }
                             className="min-h-24 w-full rounded-md border p-2"
                         />
+                        {errors.warehouse_comment && (
+                            <p className="mt-1 text-sm text-destructive">
+                                {errors.warehouse_comment}
+                            </p>
+                        )}
                     </div>
 
-                    <Button
-                        type="button"
-                        onClick={scheduleDelivery}
-                        disabled={processing}
-                    >
-                        {processing ? "Scheduling..." : "Schedule delivery"}
-                    </Button>
+                    <div className="flex gap-3">
+                        <Button
+                            type="button"
+                            onClick={scheduleDelivery}
+                            disabled={processing}
+                        >
+                            {processing ? "Scheduling..." : "Schedule delivery"}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={requestChanges}
+                            disabled={processing}
+                        >
+                            Request changes
+                        </Button>
+                    </div>
                 </div>
             </div>
 

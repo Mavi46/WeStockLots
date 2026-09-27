@@ -88,7 +88,10 @@ def edit_delivery(request, delivery_id):
         pk=delivery_id,
     )
     
-    if delivery.status != Delivery.Status.DRAFT:
+    if delivery.status not in [
+        Delivery.Status.DRAFT,
+        Delivery.Status.CHANGES_REQUESTED,
+    ]:
         return HttpResponseForbidden(
             "This delivery can no longer be edited."
         )
@@ -165,6 +168,9 @@ def edit_delivery(request, delivery_id):
                                 "supplier_comments",
                                 "",
                             ),
+                            "warehouse_comment": (
+                                delivery.warehouse_comment
+                            ),
                         },
                         "errors": errors,
                     },
@@ -210,6 +216,7 @@ def edit_delivery(request, delivery_id):
                 ),
                 "vehicle_registration": delivery.vehicle_registration,
                 "supplier_comments": delivery.supplier_comments,
+                "warehouse_comment": delivery.warehouse_comment,
             },
         },
     )
@@ -278,19 +285,32 @@ def review_delivery(request, delivery_id):
     if request.method == "POST":
         data = json.loads(request.body)
 
+        action = data.get("action")
         warehouse_id = data.get("warehouse_id")
         scheduled_at = data.get("scheduled_at")
-        warehouse_comment = data.get("warehouse_comment", "")
+        warehouse_comment = data.get(
+            "warehouse_comment",
+            "",
+        )
 
         errors = {}
 
-        if not warehouse_id:
-            errors["warehouse_id"] = "Warehouse is required."
+        if action == "schedule":
+            if not warehouse_id:
+                errors["warehouse_id"] = (
+                    "Warehouse is required."
+                )
 
-        if not scheduled_at:
-            errors["scheduled_at"] = (
-                "Scheduled date and time is required."
-            )
+            if not scheduled_at:
+                errors["scheduled_at"] = (
+                    "Scheduled date and time is required."
+                )
+
+        elif action == "request_changes":
+            if not warehouse_comment.strip():
+                errors["warehouse_comment"] = (
+                    "Warehouse comment is required when requesting changes."
+                )
 
         if errors:
             return render(
@@ -326,8 +346,12 @@ def review_delivery(request, delivery_id):
                             if delivery.loading_metres is not None
                             else ""
                         ),
-                        "vehicle_registration": delivery.vehicle_registration,
-                        "supplier_comments": delivery.supplier_comments,
+                        "vehicle_registration": (
+                            delivery.vehicle_registration
+                        ),
+                        "supplier_comments": (
+                            delivery.supplier_comments
+                        ),
                     },
                     "warehouses": [
                         {
@@ -341,15 +365,20 @@ def review_delivery(request, delivery_id):
                 },
             )
 
-        warehouse = get_object_or_404(
-            Warehouse,
-            pk=warehouse_id,
-        )
+        if action == "schedule":
+            warehouse = get_object_or_404(
+                Warehouse,
+                pk=warehouse_id,
+            )
 
-        delivery.warehouse = warehouse
-        delivery.scheduled_at = scheduled_at
-        delivery.warehouse_comment = warehouse_comment
-        delivery.status = Delivery.Status.SCHEDULED
+            delivery.warehouse = warehouse
+            delivery.scheduled_at = scheduled_at
+            delivery.warehouse_comment = warehouse_comment
+            delivery.status = Delivery.Status.SCHEDULED
+
+        elif action == "request_changes":
+            delivery.warehouse_comment = warehouse_comment
+            delivery.status = Delivery.Status.CHANGES_REQUESTED
 
         delivery.save()
 
@@ -390,8 +419,12 @@ def review_delivery(request, delivery_id):
                     if delivery.loading_metres is not None
                     else ""
                 ),
-                "vehicle_registration": delivery.vehicle_registration,
-                "supplier_comments": delivery.supplier_comments,
+                "vehicle_registration": (
+                    delivery.vehicle_registration
+                ),
+                "supplier_comments": (
+                    delivery.supplier_comments
+                ),
             },
             "warehouses": [
                 {

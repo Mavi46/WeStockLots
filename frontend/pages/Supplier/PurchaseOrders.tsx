@@ -83,16 +83,19 @@ export default function PurchaseOrders({
                                             Delivery #{delivery.id} — {delivery.status}
                                         </span>
 
-                                        {delivery.status === "draft" && (
-                                            <Button
-                                                variant="outline"
-                                                onClick={() =>
-                                                    editDelivery(delivery.id)
-                                                }
-                                            >
-                                                Edit delivery
-                                            </Button>
-                                        )}
+                                        {(
+                                            delivery.status === "draft" ||
+                                            delivery.status === "changes_requested"
+                                        ) && (
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        editDelivery(delivery.id)
+                                                    }
+                                                >
+                                                    Edit delivery
+                                                </Button>
+                                            )}
                                     </div>
                                 ))
                             )}
